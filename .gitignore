@@ -1,0 +1,9 @@
+# Docker用環境変数ファイル
+.env
+
+# MySQLデータ
+docker/mysql/data/
+
+# IDEファイル
+.vscode/
+.idea/
