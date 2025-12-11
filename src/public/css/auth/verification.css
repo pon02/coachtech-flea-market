@@ -1,0 +1,85 @@
+.verification-form__content {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.verification-form__message {
+    margin-bottom: 70px;
+}
+
+.verification-form__message p {
+    font-size: 24px;
+    font-weight: bold;
+    color: #000000;
+    margin: 10px 0;
+    line-height: 1.5;
+}
+
+.verification-form__action {
+    margin-bottom: 70px;
+}
+
+.verification-form__button {
+    display: inline-block;
+    width: 257px;
+    height: 69px;
+    background-color: #D9D9D9;
+    color: #000000;
+    font-size: 24px;
+    font-weight: bold;
+    text-decoration: none;
+    border: 1px solid #000000;
+    border-radius: 5px;
+    line-height: 69px;
+    text-align: center;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.verification-form__button:hover {
+    opacity: 0.8;
+}
+
+.verification-form__resend {
+    margin-top: 20px;
+}
+
+.verification-form__resend form {
+    margin: 0;
+}
+
+.verification-form__resend-link {
+    background: none;
+    border: none;
+    color: #0073CC;
+    font-size: 20px;
+    text-decoration: none;
+    cursor: pointer;
+    padding: 0;
+    font-family: inherit;
+    transition: opacity 0.2s;
+}
+
+.verification-form__resend-link:hover {
+    opacity: 0.7;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    border-radius: 4px;
+    padding: 12px;
+    margin: 20px 0;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.alert-success p {
+    color: #155724;
+    font-size: 16px;
+    font-weight: normal;
+    margin: 0;
+}
