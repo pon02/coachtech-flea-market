@@ -69,16 +69,24 @@ class MypageController extends Controller
 
         $user->update($validated);
 
+        // 初回プロフィール設定かどうかを判定
+        $isFirstTimeSetup = session('first_time_profile_setup', false);
         $returnToMypage = session('profile_return_to_mypage', false);
         $referer = request()->headers->get('referer');
         $previousUrl = url()->previous();
 
+        if ($isFirstTimeSetup) {
+            session()->forget('first_time_profile_setup');
+            session()->forget('profile_return_to_mypage');
+            return redirect()->route('home')->with('success', 'プロフィール設定が完了しました');
+        }
+
         if ($returnToMypage || ($previousUrl && str_contains($previousUrl, '/mypage'))) {
             session()->forget('profile_return_to_mypage');
-            return redirect()->route('mypage')->with('success', 'プロフィールを更新しました。');
+            return redirect()->route('mypage')->with('success', 'プロフィールを更新しました');
         } else {
             session()->forget('profile_return_to_mypage');
-            return redirect()->route('home')->with('success', 'プロフィールを更新しました。');
+            return redirect()->route('home')->with('success', 'プロフィールを更新しました');
         }
     }
 
@@ -91,6 +99,6 @@ class MypageController extends Controller
             $user->update(['profile_image' => null]);
         }
 
-        return redirect()->route('mypage.profile')->with('success', 'プロフィール画像を削除しました。');
+        return redirect()->route('mypage.profile')->with('success', 'プロフィール画像を削除しました');
     }
 }

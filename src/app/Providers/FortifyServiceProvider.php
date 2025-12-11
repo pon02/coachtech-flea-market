@@ -82,9 +82,12 @@ class FortifyServiceProvider extends ServiceProvider
         $this->app->instance(VerifyEmailResponse::class, new class implements VerifyEmailResponse {
             public function toResponse($request)
             {
+                // 初回プロフィール設定フラグを設定
+                session(['first_time_profile_setup' => true]);
+
                 return $request->wantsJson()
                     ? response()->json(['status' => 'Email verified successfully'])
-                    : redirect()->route('mypage.profile')->with('status', 'メール認証が完了しました。プロフィールを設定してください。');
+                    : redirect()->route('mypage.profile')->with('status', 'メール認証が完了しました');
             }
         });
 
