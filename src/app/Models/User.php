@@ -8,7 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -21,6 +21,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'postal_code',
+        'address',
+        'building',
+        'profile_image',
     ];
 
     /**
@@ -41,4 +45,44 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * ユーザーと商品の1対多リレーション（出品者）
+     */
+    public function items()
+    {
+        return $this->hasMany(Item::class);
+    }
+
+    /**
+     * ユーザーと注文の1対多リレーション（購入者）
+     */
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    /**
+     * ユーザーがいいねした商品（多対多リレーション）
+     */
+    public function likedItems()
+    {
+        return $this->belongsToMany(Item::class, 'likes', 'user_id', 'item_id')->withTimestamps();
+    }
+
+    /**
+     * ユーザーのいいね（1対多リレーション）
+     */
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
+    }
+
+    /**
+     * ユーザーのコメント（1対多リレーション）
+     */
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
 }
