@@ -75,10 +75,10 @@ class MyListTest extends TestCase
 
         $soldItemData = $responseItems->firstWhere('id', $soldItem->id);
         $unsoldItemData = $responseItems->firstWhere('id', $unsoldItem->id);
-        
+
         $this->assertNotNull($soldItemData, 'Sold商品がレスポンスに含まれていません');
         $this->assertNotNull($unsoldItemData, '未売商品がレスポンスに含まれていません');
-        
+
         $this->assertTrue((bool)$soldItemData->is_sold, 'Sold商品のis_soldがtrueではありません');
         $this->assertFalse((bool)$unsoldItemData->is_sold, '未売商品のis_soldがfalseではありません');
     }
