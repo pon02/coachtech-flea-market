@@ -10,7 +10,8 @@
 - **Docker**: コンテナ実行環境
 - **Docker Compose**: マルチコンテナ管理
 
-**注意**: PHP, Laravel, MySQL, Node.js 等は Docker コンテナ内に含まれているため、ローカルへのインストールは不要です。
+**注意**: PHP / Laravel / MySQL は Docker コンテナ内で動作します。Node.js は本リポジトリのコンテナには含まれていないため、フロントのビルドが必要な場合はホスト側に Node.js を用意してください。
+補足：本アプリは `public/js` の素のJavaScriptも利用していますが、**テスト実行や通常利用に Node.js は必須ではありません。**
 
 ### Docker ビルド
 
@@ -45,7 +46,6 @@ docker compose exec php bash
 
 ```bash
 composer install
-npm install
 ```
 
 3. 環境変数ファイルをコピー
@@ -53,6 +53,9 @@ npm install
 ```bash
 cp .env.example .env
 ```
+
+※ MailHog（メール送信テスト）で「An email must have a "From" or a "Sender" header.」が出る場合は、送信元が未設定です。
+このリポジトリの `src/.env.example` では `MAIL_FROM_ADDRESS` を設定済みなので、上記コピー後に `src/.env` に `MAIL_FROM_ADDRESS` が入っていることを確認してください。
 
 4. アプリケーションキーを生成
 
@@ -74,9 +77,17 @@ php artisan storage:link
 
 7. フロントエンドアセットをビルド
 
+（任意）フロントエンドの依存を入れる場合（ホスト側で `src/` に移動して実行）
+
+```bash
+npm install
+```
+
 ```bash
 npm run dev
 ```
+
+※ 画面表示用のCSS/JSがすでに配置されているため、**動作確認やテストだけならこの手順はスキップ可能**です。
 
 ## 使用技術（実行環境）
 
@@ -109,7 +120,7 @@ npm run dev
 
 ### テスト
 
-- **PHPUnit**: 単体・統合テスト
+- **PHPUnit**: 統合テスト
 
 ## ER 図
 
@@ -170,20 +181,53 @@ npm run dev
 | tanaka     | tanaka@example.com | 12345678   |
 | yamada     | yamada@example.com | 12345678   |
 | suzuki     | suzuki@example.com | 12345678   |
-| sato       | sato@example.com   | 12345678   |
-| takeda     | takeda@example.com | 12345678   |
 
 **※注意**: これらはデモ用アカウントです。本番環境では使用しないでください。
 
 ## テスト
 
+### テスト実行前の準備（初回のみ）
+
+このリポジトリは MySQL を使用します。テストは `laravel_test` データベースを使うため、初回は DB を作成し、`.env.testing` を準備してください。
+
+1) `.env.testing` を作成
+
+```bash
+# src/.env.testing を作成（テスト環境）
+docker compose exec -T php cp .env.example .env.testing
+```
+
+2) APP_KEY を生成（テスト）
+
+```bash
+docker compose exec -T php php artisan key:generate --env=testing
+```
+
+3) テスト用DBを作成（`laravel_test`）
+
+```bash
+docker compose exec -T mysql mysql -uroot -pdev_root_pass -e "CREATE DATABASE IF NOT EXISTS laravel_test; GRANT ALL PRIVILEGES ON laravel_test.* TO 'laravel_user'@'%'; FLUSH PRIVILEGES;"
+```
+
+4) 接続確認（任意）
+
+```bash
+docker compose exec -T php php artisan migrate:fresh --seed --env=testing
+```
+
+※ もし `storage` / `bootstrap/cache` の権限エラーが出る場合のみ、以下を実行してください。
+
+```bash
+docker compose exec -T php chmod -R 777 storage bootstrap/cache
+```
+
 ```bash
 # 全テスト実行
-docker compose exec php php artisan test
+docker compose exec -T php php artisan test --env=testing
 
 # Featureテストのみ実行
-docker compose exec php php artisan test --testsuite=Feature
+docker compose exec -T php php artisan test --env=testing --testsuite=Feature
 
 # 特定のテストファイルを実行
-docker compose exec php php artisan test tests/Feature/Auth/LoginTest.php
+docker compose exec -T php php artisan test --env=testing tests/Feature/Auth/LoginTest.php
 ```
