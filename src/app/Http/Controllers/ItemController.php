@@ -7,8 +7,6 @@ use App\Http\Requests\ExhibitionRequest;
 use App\Models\Item;
 use App\Models\Category;
 use App\Models\Condition;
-use App\Models\Order;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 
 class ItemController extends Controller

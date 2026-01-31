@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Item;
-use App\Models\Order;
 use Stripe\Stripe;
 use Stripe\Checkout\Session;
 
