@@ -40,7 +40,7 @@ class ItemSeeder extends Seeder
         $onion = Item::create([
             'user_id' => 2,
             'name' => '玉ねぎ3束',
-            'brand_name' => '',
+            'brand_name' => 'なし',
             'condition_id' => 3,
             'description' => '新鮮な玉ねぎ3束のセット',
             'price' => 300,
@@ -73,7 +73,7 @@ class ItemSeeder extends Seeder
         $mic = Item::create([
             'user_id' => 3,
             'name' => 'マイク',
-            'brand_name' => '',
+            'brand_name' => 'なし',
             'condition_id' => 2,
             'description' => '高音質のレコーディング用マイク',
             'price' => 8000,
@@ -95,7 +95,7 @@ class ItemSeeder extends Seeder
         $tumbler = Item::create([
             'user_id' => 4,
             'name' => 'タンブラー',
-            'brand_name' => '',
+            'brand_name' => 'なし',
             'condition_id' => 4,
             'description' => '使いやすいタンブラー',
             'price' => 500,
