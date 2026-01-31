@@ -58,4 +58,72 @@ document.addEventListener('DOMContentLoaded', function() {
         const pageParam = urlParams.get('page') || 'sell';
         switchTab(pageParam);
     });
+
+    // ユーザー名の自動縮小（折り返し無しで幅にフィットさせる）
+    const userNameEl = document.querySelector('.profile-info__name');
+    if (userNameEl) {
+        const minFontPx = 16;
+
+        const getMaxFontPx = () => {
+            if (userNameEl.dataset.maxFontPx) {
+                const v = Number(userNameEl.dataset.maxFontPx);
+                if (!Number.isNaN(v) && v > 0) return v;
+            }
+            const computed = window.getComputedStyle(userNameEl);
+            const px = Number.parseFloat(computed.fontSize);
+            if (!Number.isNaN(px) && px > 0) {
+                userNameEl.dataset.maxFontPx = String(px);
+                return px;
+            }
+            return 36;
+        };
+
+        const fits = () => {
+            return userNameEl.scrollWidth <= userNameEl.clientWidth;
+        };
+
+        const applyFontPx = (px) => {
+            userNameEl.style.fontSize = `${px}px`;
+        };
+
+        const fitToWidth = () => {
+            const maxPx = Math.max(minFontPx, Math.floor(getMaxFontPx()));
+
+            applyFontPx(maxPx);
+
+            if (userNameEl.clientWidth === 0) return;
+            if (fits()) return;
+
+            let low = minFontPx;
+            let high = maxPx;
+            while (low < high) {
+                const mid = Math.ceil((low + high) / 2);
+                applyFontPx(mid);
+                if (fits()) {
+                    low = mid;
+                } else {
+                    high = mid - 1;
+                }
+            }
+            applyFontPx(low);
+        };
+
+        requestAnimationFrame(fitToWidth);
+
+        let rafId = null;
+        const scheduleFit = () => {
+            if (rafId) cancelAnimationFrame(rafId);
+            rafId = requestAnimationFrame(() => {
+                rafId = null;
+                fitToWidth();
+            });
+        };
+        window.addEventListener('resize', scheduleFit);
+
+        if ('ResizeObserver' in window) {
+            const ro = new ResizeObserver(scheduleFit);
+            ro.observe(userNameEl);
+            if (userNameEl.parentElement) ro.observe(userNameEl.parentElement);
+        }
+    }
 });
