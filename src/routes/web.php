@@ -70,12 +70,14 @@ Route::middleware(['auth'])->group(function () {
     // いいね機能
     // ----------------------------------------
     Route::post('/like/{product}', [LikeController::class, 'toggleLike'])->name('likes.toggle');
+
+    // ========================================
+    // コメント機能（authミドルウェアで保護）
+    // ========================================
+    Route::post('/item/{id}/comment', [CommentController::class, 'store'])->name('comments.store');
 });
 
-// ========================================
-// コメント機能（Controller内で認証チェック）
-// ========================================
-Route::post('/item/{id}/comment', [CommentController::class, 'store'])->name('comments.store');
+
 
 // ========================================
 // メール認証関連（Fortifyが自動処理）
