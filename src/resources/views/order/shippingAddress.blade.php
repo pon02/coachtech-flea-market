@@ -14,9 +14,9 @@
                        id="postal_code"
                        name="postal_code"
                        class="form-input {{ $errors->has('postal_code') ? 'error' : '' }}"
-                       placeholder="1234567"
+                       placeholder="123-4567"
                        value="{{ old('postal_code', $shippingData['postal_code']) }}"
-                       maxlength="7">
+                       maxlength="8">
                 @error('postal_code')
                     <span class="error-message">{{ $message }}</span>
                 @enderror
