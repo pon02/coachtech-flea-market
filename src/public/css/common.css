@@ -6,7 +6,7 @@
 .header__container {
     margin: 0 auto;
     padding: 15px 15px;
-    max-width: 1500px;
+    max-width: 1540px;
 }
 
 .header-utilities {
@@ -14,11 +14,18 @@
     align-items: center;
     justify-content: space-between;
     gap: 20px;
+    min-height: 50px;
 }
 
 .header__logo {
     flex: 1;
     max-width: 370px;
+}
+
+.header__logo img {
+    display: block;
+    max-width: 100%;
+    height: auto;
 }
 
 .header__search {
@@ -128,16 +135,78 @@ body {
 
 /* 共通レスポンシブ対応 */
 @media (min-width: 1400px) and (max-width: 1540px) {
-    .header__container {
-        max-width: 1400px;
-    }
-
     .header__search input {
         max-width: 450px;
     }
 
     .alert {
         max-width: 1100px;
+    }
+}
+
+@media (max-width: 1300px) {
+    .header-utilities {
+        flex-wrap: nowrap;
+        gap: 12px;
+    }
+
+    .header__logo {
+        flex: 0 1 auto;
+        min-width: 0;
+        max-width: 240px;
+    }
+
+    .header__search {
+        flex: 1 1 auto;
+        min-width: 0;
+        transform: none;
+        justify-content: center;
+    }
+
+    .header__search input {
+        width: 100%;
+        max-width: 360px;
+        min-width: 0;
+        height: 44px;
+        padding: 0 16px;
+        font-size: 16px;
+    }
+
+    .header-utilities nav {
+        flex: 0 0 auto;
+    }
+
+    .nav__list {
+        gap: 16px;
+        flex-wrap: nowrap;
+    }
+
+    .nav__text,
+    .nav__button {
+        font-size: 16px;
+        white-space: nowrap;
+    }
+
+    .nav__button {
+        padding: 6px 14px;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 830px) {
+    .header__logo {
+        max-width: 220px;
+    }
+
+    .header__search input {
+        max-width: 300px;
+    }
+
+    .nav__list {
+        gap: 12px;
+    }
+
+    .nav__button {
+        padding: 6px 12px;
     }
 }
 
