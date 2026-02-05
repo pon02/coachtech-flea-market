@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Item;
 use App\Models\Payment;
 use App\Models\Order;
+use App\Models\Chat;
+use App\Models\ChatParticipant;
 use App\Http\Requests\PurchaseRequest;
 
 class OrderController extends Controller
@@ -57,21 +59,31 @@ class OrderController extends Controller
             'building' => $user->building,
         ]);
 
-        Order::create([
+        $order = Order::create([
             'user_id' => $user->id,
             'item_id' => $item->id,
             'payment_id' => $request->payment_id,
             'price' => $item->price,
-            'status' => 'completed',
+            'status' => 'pending',
             'shipping_postal_code' => $shippingData['postal_code'],
             'shipping_address' => $shippingData['address'] . ($shippingData['building'] ? ' ' . $shippingData['building'] : ''),
         ]);
+
+        $chat = Chat::firstOrCreate(['order_id' => $order->id]);
+        ChatParticipant::firstOrCreate(
+            ['chat_id' => $chat->id, 'role' => ChatParticipant::ROLE_BUYER],
+            ['user_id' => $order->user_id]
+        );
+        ChatParticipant::firstOrCreate(
+            ['chat_id' => $chat->id, 'role' => ChatParticipant::ROLE_SELLER],
+            ['user_id' => $item->user_id]
+        );
 
         $item->update(['is_sold' => true]);
 
         session()->forget('shipping_address');
 
-        return redirect()->route('home')
+        return redirect()->route('trade.chat.show', $order->id)
             ->with('success', '商品を購入しました。');
     }
 
@@ -93,20 +105,30 @@ class OrderController extends Controller
                 'building' => $user->building,
             ]);
 
-            Order::create([
+            $order = Order::create([
                 'user_id' => $user->id,
                 'item_id' => $item->id,
                 'payment_id' => 2,
                 'price' => $item->price,
-                'status' => 'completed',
+                'status' => 'pending',
                 'shipping_postal_code' => $shippingData['postal_code'],
                 'shipping_address' => $shippingData['address'] . ($shippingData['building'] ? ' ' . $shippingData['building'] : ''),
             ]);
 
+            $chat = Chat::firstOrCreate(['order_id' => $order->id]);
+            ChatParticipant::firstOrCreate(
+                ['chat_id' => $chat->id, 'role' => ChatParticipant::ROLE_BUYER],
+                ['user_id' => $order->user_id]
+            );
+            ChatParticipant::firstOrCreate(
+                ['chat_id' => $chat->id, 'role' => ChatParticipant::ROLE_SELLER],
+                ['user_id' => $item->user_id]
+            );
+
             $item->update(['is_sold' => true]);
             session()->forget('shipping_address');
 
-            return redirect()->route('home')
+            return redirect()->route('trade.chat.show', $order->id)
                 ->with('success', 'カード決済が完了しました。');
         }
 
