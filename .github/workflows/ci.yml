@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+      - feature/**
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build and start containers
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d --build php mysql
+
+      - name: Wait for MySQL
+        run: |
+          set -e
+          for i in {1..30}; do
+            if docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T mysql mysql -uroot -pdev_root_pass -e "SELECT 1" >/dev/null 2>&1; then
+              echo "MySQL is ready"
+              exit 0
+            fi
+            echo "Waiting for MySQL... ($i/30)"
+            sleep 2
+          done
+          echo "MySQL did not become ready in time" >&2
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml logs mysql || true
+          exit 1
+
+      - name: Prepare .env.testing
+        run: |
+          cp src/.env.example src/.env.testing
+          sed -i 's/^APP_ENV=.*/APP_ENV=testing/' src/.env.testing
+          sed -i 's/^APP_DEBUG=.*/APP_DEBUG=false/' src/.env.testing
+          sed -i 's/^DB_HOST=.*/DB_HOST=mysql/' src/.env.testing
+          sed -i 's/^DB_DATABASE=.*/DB_DATABASE=laravel_test/' src/.env.testing
+          sed -i 's/^DB_USERNAME=.*/DB_USERNAME=laravel_user/' src/.env.testing
+          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=dev_laravel_pass/' src/.env.testing
+
+      - name: Create test database
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T mysql mysql -uroot -pdev_root_pass -e "CREATE DATABASE IF NOT EXISTS laravel_test; GRANT ALL PRIVILEGES ON laravel_test.* TO 'laravel_user'@'%'; FLUSH PRIVILEGES;"
+
+      - name: Generate APP_KEY (testing)
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T php php artisan key:generate --env=testing
+
+      - name: Run tests (generate JUnit report)
+        id: run_tests
+        continue-on-error: true
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T php sh -lc 'mkdir -p storage/test-results'
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T php php artisan test --env=testing --log-junit storage/test-results/junit.xml
+
+      - name: Upload test report (artifact)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-test-report
+          path: src/storage/test-results/junit.xml
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Dump logs on failure
+        if: failure()
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml ps
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml logs --no-color | tail -n 400
+
+      - name: Fail job if tests failed
+        if: steps.run_tests.outcome == 'failure'
+        run: exit 1
+
+      - name: Tear down
+        if: always()
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml down -v
