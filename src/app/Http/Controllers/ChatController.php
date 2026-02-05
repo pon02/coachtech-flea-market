@@ -5,79 +5,37 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ChatMessageRequest;
 use App\Models\Chat;
 use App\Models\ChatMessage;
-use App\Models\ChatParticipant;
 use App\Models\Order;
 use App\Models\Rating;
+use App\Services\TradeChatService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class ChatController extends Controller
 {
+    private TradeChatService $tradeChatService;
+
+    public function __construct(TradeChatService $tradeChatService)
+    {
+        $this->tradeChatService = $tradeChatService;
+    }
+
     public function show(Request $request, $orderId)
     {
         $order = Order::with(['user', 'item.user'])->findOrFail($orderId);
         $this->abortUnlessParticipant($order);
 
-        $chat = Chat::firstOrCreate([
-            'order_id' => $order->id,
-        ]);
-
-        $this->ensureParticipants($chat, $order);
-        $this->touchLastReadAt($chat->id, Auth::id());
-
-        $messages = ChatMessage::with('user')
-            ->where('chat_id', $chat->id)
-            ->orderBy('created_at')
-            ->get();
-
-        $latestMessageId = ChatMessage::where('chat_id', $chat->id)
-            ->orderByDesc('created_at')
-            ->orderByDesc('id')
-            ->value('id');
-
-        $partnerUser = Auth::id() === $order->user_id ? $order->item->user : $order->user;
-
-        $buyerId = (int) $order->user_id;
         $viewerId = (int) Auth::id();
-        $buyerRated = Rating::where('order_id', $order->id)
-            ->where('rater_id', $buyerId)
-            ->exists();
-        $buyerHasRated = ($viewerId === $buyerId) && $buyerRated;
+        $data = $this->tradeChatService->buildShowData($request, $order, $viewerId);
 
-        $shouldShowRatingModal = false;
-        if ($order->completed_requested_at) {
-            $alreadyRated = Rating::where('order_id', $order->id)
-                ->where('rater_id', Auth::id())
-                ->exists();
-
-            if (!$alreadyRated) {
-                $shouldShowRatingModal = true;
-            }
-        }
-
-        if (session()->has('force_show_rating_modal')) {
-            $shouldShowRatingModal = true;
-        }
-
-        $sidebarOrders = null;
-        if (Auth::id() === $order->item->user_id) {
-            $sidebarOrders = Order::with(['item', 'chat'])
-                ->where('status', 'pending')
-                ->whereHas('item', function ($query) {
-                    $query->where('user_id', Auth::id());
-                })
-                ->whereHas('chat')
-                ->addSelect([
-                    'last_message_at' => ChatMessage::query()
-                        ->selectRaw('MAX(chat_messages.created_at)')
-                        ->join('chats', 'chats.id', '=', 'chat_messages.chat_id')
-                        ->whereColumn('chats.order_id', 'orders.id'),
-                ])
-                ->orderByDesc('last_message_at')
-                ->orderByDesc('created_at')
-                ->get();
-        }
+        $chat = $data['chat'];
+        $messages = $data['messages'];
+        $sidebarOrders = $data['sidebarOrders'];
+        $latestMessageId = $data['latestMessageId'];
+        $partnerUser = $data['partnerUser'];
+        $shouldShowRatingModal = $data['shouldShowRatingModal'];
+        $buyerHasRated = $data['buyerHasRated'];
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -99,20 +57,10 @@ class ChatController extends Controller
         $order = Order::with(['item.user'])->findOrFail($orderId);
         $this->abortUnlessParticipant($order);
 
-        if ((int) Auth::id() === (int) $order->user_id) {
-            $buyerRated = Rating::where('order_id', $order->id)
-                ->where('rater_id', $order->user_id)
-                ->exists();
-            if ($buyerRated) {
-                abort(403);
-            }
-        }
+        $this->abortIfBuyerHasRated($order);
 
-        $chat = Chat::firstOrCreate([
-            'order_id' => $order->id,
-        ]);
-
-        $this->ensureParticipants($chat, $order);
+        $chat = $this->tradeChatService->getOrCreateChat($order);
+        $this->tradeChatService->ensureParticipants($chat, $order);
 
         $validated = $request->validated();
 
@@ -128,7 +76,7 @@ class ChatController extends Controller
             'image_path' => $imagePath,
         ]);
 
-        $this->touchLastReadAt($chat->id, Auth::id());
+        $this->tradeChatService->touchLastReadAt($chat->id, Auth::id());
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -165,33 +113,13 @@ class ChatController extends Controller
         $order = Order::with(['user', 'item.user'])->findOrFail($orderId);
         $this->abortUnlessParticipant($order);
 
-        if ((int) Auth::id() === (int) $order->user_id) {
-            $buyerRated = Rating::where('order_id', $order->id)
-                ->where('rater_id', $order->user_id)
-                ->exists();
-            if ($buyerRated) {
-                abort(403);
-            }
-        }
-
         $chat = Chat::where('order_id', $order->id)->firstOrFail();
 
         $message = ChatMessage::where('id', $messageId)
             ->where('chat_id', $chat->id)
             ->firstOrFail();
 
-        if ((int) $message->user_id !== (int) Auth::id()) {
-            abort(403);
-        }
-
-        $latestId = ChatMessage::where('chat_id', $chat->id)
-            ->orderByDesc('created_at')
-            ->orderByDesc('id')
-            ->value('id');
-
-        if ((int) $latestId !== (int) $message->id) {
-            abort(403);
-        }
+        $this->authorize('update', $message);
 
         $validated = $request->validate(
             ['message' => 'required|string|max:400'],
@@ -212,33 +140,13 @@ class ChatController extends Controller
         $order = Order::with(['user', 'item.user'])->findOrFail($orderId);
         $this->abortUnlessParticipant($order);
 
-        if ((int) Auth::id() === (int) $order->user_id) {
-            $buyerRated = Rating::where('order_id', $order->id)
-                ->where('rater_id', $order->user_id)
-                ->exists();
-            if ($buyerRated) {
-                abort(403);
-            }
-        }
-
         $chat = Chat::where('order_id', $order->id)->firstOrFail();
 
         $message = ChatMessage::where('id', $messageId)
             ->where('chat_id', $chat->id)
             ->firstOrFail();
 
-        if ((int) $message->user_id !== (int) Auth::id()) {
-            abort(403);
-        }
-
-        $latestId = ChatMessage::where('chat_id', $chat->id)
-            ->orderByDesc('created_at')
-            ->orderByDesc('id')
-            ->value('id');
-
-        if ((int) $latestId !== (int) $message->id) {
-            abort(403);
-        }
+        $this->authorize('delete', $message);
 
         if (!empty($message->image_path)) {
             Storage::disk('public')->delete($message->image_path);
@@ -267,26 +175,19 @@ class ChatController extends Controller
         }
     }
 
-    private function ensureParticipants(Chat $chat, Order $order)
+    private function abortIfBuyerHasRated(Order $order)
     {
-        $buyerId = $order->user_id;
-        $sellerId = $order->item->user_id;
+        if ((int) Auth::id() !== (int) $order->user_id) {
+            return;
+        }
 
-        ChatParticipant::firstOrCreate(
-            ['chat_id' => $chat->id, 'role' => ChatParticipant::ROLE_BUYER],
-            ['user_id' => $buyerId]
-        );
+        $buyerRated = Rating::where('order_id', $order->id)
+            ->where('rater_id', $order->user_id)
+            ->exists();
 
-        ChatParticipant::firstOrCreate(
-            ['chat_id' => $chat->id, 'role' => ChatParticipant::ROLE_SELLER],
-            ['user_id' => $sellerId]
-        );
+        if ($buyerRated) {
+            abort(403);
+        }
     }
 
-    private function touchLastReadAt($chatId, $userId)
-    {
-        ChatParticipant::where('chat_id', $chatId)
-            ->where('user_id', $userId)
-            ->update(['last_read_at' => now()]);
-    }
 }
