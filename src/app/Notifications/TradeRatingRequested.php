@@ -40,6 +40,6 @@ class TradeRatingRequested extends Notification
             ->line('購入者（' . $this->buyerName . 'さん）から評価が送信されました。')
             ->line('商品名：' . $this->itemName)
             ->line('購入者の評価：' . $starsText)
-            ->line('取引画面から、購入者（' . $notifiable->name . 'さん)に対する評価の送信をお願いします。');
+            ->line('取引画面から、購入者（' . $this->buyerName . 'さん)に対する評価の送信をお願いします。');
     }
 }
