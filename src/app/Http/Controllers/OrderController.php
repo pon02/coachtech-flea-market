@@ -83,8 +83,8 @@ class OrderController extends Controller
 
         session()->forget('shipping_address');
 
-        return redirect()->route('trade.chat.show', $order->id)
-            ->with('success', '商品を購入しました。');
+        return redirect('/')
+            ->with('success', '商品を購入しました。出品者へのお問い合わせはマイページの取引タブから取引チャットをご利用ください。');
     }
 
     public function completeStripePayment(Request $request, $id)
@@ -128,8 +128,8 @@ class OrderController extends Controller
             $item->update(['is_sold' => true]);
             session()->forget('shipping_address');
 
-            return redirect()->route('trade.chat.show', $order->id)
-                ->with('success', 'カード決済が完了しました。');
+            return redirect('/')
+                ->with('success', 'カード決済が完了しました。出品者へのお問い合わせはマイページの取引タブから取引チャットをご利用ください。');
         }
 
         return redirect()->route('home')

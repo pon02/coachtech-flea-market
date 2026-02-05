@@ -74,20 +74,25 @@ class PurchaseTest extends TestCase
 
         $convenienceStorePayment = Payment::where('name', 'コンビニ払い')->first();
         $purchaseResponse = $this->performPurchase($item, $buyer);
+
         $purchaseResponse->assertRedirect('/')
-                         ->assertSessionHas('success', '商品を購入しました。');
+                         ->assertSessionHas('success', '商品を購入しました。出品者へのお問い合わせはマイページの取引タブから取引チャットをご利用ください。');
+
+        $order = Order::where('user_id', $buyer->id)
+            ->where('item_id', $item->id)
+            ->latest('id')
+            ->first();
+        $this->assertNotNull($order);
 
         $this->assertDatabaseHas('orders', [
             'user_id' => $buyer->id,
             'item_id' => $item->id,
             'payment_id' => $convenienceStorePayment->id,
             'price' => $item->price,
-            'status' => 'completed',
+            'status' => 'pending',
             'shipping_postal_code' => $buyer->postal_code,
         ]);
 
-        $order = Order::where('user_id', $buyer->id)->where('item_id', $item->id)->first();
-        $this->assertNotNull($order);
         $this->assertEquals($convenienceStorePayment->id, $order->payment_id);
         $this->assertEquals($item->price, $order->price);
     }
@@ -120,7 +125,7 @@ class PurchaseTest extends TestCase
         $this->assertDatabaseHas('orders', [
             'user_id' => $buyer->id,
             'item_id' => $item->id,
-            'status' => 'completed',
+            'status' => 'pending',
         ]);
     }
 
@@ -157,7 +162,7 @@ class PurchaseTest extends TestCase
             'item_id' => $item->id,
             'payment_id' => $convenienceStorePayment->id,
             'price' => $item->price,
-            'status' => 'completed',
+            'status' => 'pending',
         ]);
 
         $order = Order::with('item')->where('user_id', $buyer->id)->where('item_id', $item->id)->first();
