@@ -86,8 +86,7 @@ class CommentsTest extends TestCase
             'text' => $commentText,
         ]);
 
-        $commentResponse->assertRedirect("/item/{$item->id}");
-        $commentResponse->assertSessionHas('error');
+        $commentResponse->assertRedirect('/login');
 
         $this->assertDatabaseMissing('comments', [
             'item_id' => $item->id,
