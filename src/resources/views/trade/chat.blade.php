@@ -1,7 +1,9 @@
 @extends('layouts.logo')
 
 @section('css')
-    <link rel="stylesheet" href="{{ asset('css/trade/chat.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/trade/chat-layout.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/trade/chat-messages.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/trade/chat-modals.css') }}">
 @endsection
 
 @section('content')

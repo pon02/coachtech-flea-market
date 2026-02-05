@@ -1,0 +1,163 @@
+/* ===== Image Modal ===== */
+.trade-chat__img-modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    z-index: 60;
+}
+
+.trade-chat__img-modal.is-open {
+    display: block;
+}
+
+.trade-chat__img-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.trade-chat__img-modal-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(920px, 92vw);
+    max-height: 88vh;
+    background: #fff;
+    border-radius: 10px;
+    padding: 12px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.trade-chat__img-modal-close {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0,0,0,0.55);
+    color: #fff;
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 36px;
+}
+
+.trade-chat__img-modal-image {
+    width: 100%;
+    height: auto;
+    max-height: 78vh;
+    object-fit: contain;
+    border-radius: 8px;
+    background: #f3f3f3;
+}
+
+.trade-chat__img-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.trade-chat__img-modal-open {
+    color: #000;
+    text-decoration: underline;
+    font-size: 14px;
+}
+
+/* ===== Rating Modal ===== */
+.trade-chat__modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+}
+
+.trade-chat__modal.is-open {
+    display: flex;
+}
+
+.trade-chat__modal-card {
+    width: min(598px, 92vw);
+    height: 367px;
+    background: #FDFCE6;
+    border-radius: 15px;
+    border: 1px solid #000;
+    padding: 26px 28px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.trade-chat__modal-title {
+    margin: 0;
+    font-size: 35px;
+    font-weight: 400;
+    color: #000;
+}
+
+.trade-chat__modal-divider {
+    height: 0;
+    border-top: 1px solid #000;
+    margin: 14px -28px;
+}
+
+.trade-chat__modal-text {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 400;
+    color: #868686;
+}
+
+.trade-chat__stars {
+    display: flex;
+    gap: 12px;
+    margin: 16px 0;
+    justify-content: center;
+}
+
+.trade-chat__star {
+    width: 100px;
+    height: 100px;
+    font-size: 72px;
+    line-height: 100px;
+    color: #D9D9D9;
+    cursor: pointer;
+    user-select: none;
+    text-align: center;
+}
+
+.trade-chat__star.is-on {
+    color: #FFF048;
+}
+
+.trade-chat__modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: auto;
+}
+
+.trade-chat__modal-submit {
+    width: 127px;
+    height: 49px;
+    border: none;
+    border-radius: 5px;
+    background: #FF8282;
+    color: #fff;
+    cursor: pointer;
+    font-size: 24px;
+    font-weight: 400;
+}
+
+.trade-chat__modal-close {
+    padding: 10px 16px;
+    border: 1px solid #999;
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+}
