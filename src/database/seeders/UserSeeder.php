@@ -35,18 +35,6 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('12345678'),
                 'profile_image' => 'profile_images/suzuki.jpeg',
             ],
-            [
-                'name' => 'sato',
-                'email' => 'sato@example.com',
-                'password' => Hash::make('12345678'),
-                'profile_image' => 'profile_images/sato.jpeg',
-            ],
-            [
-                'name' => 'takeda',
-                'email' => 'takeda@example.com',
-                'password' => Hash::make('12345678'),
-                'profile_image' => 'profile_images/takeda.jpeg',
-            ],
         ];
 
         foreach ($users as $userData) {
