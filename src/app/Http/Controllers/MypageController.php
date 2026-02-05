@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Item;
 use App\Models\Order;
+use App\Models\Chat;
+use App\Models\Rating;
 use App\Http\Requests\ProfileRequest;
 
 class MypageController extends Controller
@@ -37,7 +40,53 @@ class MypageController extends Controller
             ->orderBy('orders.created_at', 'desc')
             ->get();
 
-        return view('mypage.mypage', compact('user', 'listedItems', 'purchasedItems', 'page'));
+        $tradeOrders = Order::with(['item', 'item.user', 'user', 'chat'])
+            ->where('status', 'pending')
+            ->where(function ($query) use ($user) {
+                $query->where('user_id', $user->id)
+                    ->orWhereHas('item', function ($q) use ($user) {
+                        $q->where('user_id', $user->id);
+                    });
+            })
+            ->orderByDesc('created_at')
+            ->get();
+
+        // 未読数（相手のメッセージのみカウント）
+        $tradeUnreadCounts = collect();
+        $tradeUnreadTotal = 0;
+
+        if ($tradeOrders->isNotEmpty()) {
+            $orderIds = $tradeOrders->pluck('id');
+            $userId = $user->id;
+
+            $tradeUnreadCounts = DB::table('chat_messages')
+                ->join('chats', 'chats.id', '=', 'chat_messages.chat_id')
+                ->leftJoin('chat_participants as cp', function ($join) use ($userId) {
+                    $join->on('cp.chat_id', '=', 'chat_messages.chat_id')
+                        ->where('cp.user_id', '=', $userId);
+                })
+                ->whereIn('chats.order_id', $orderIds)
+                ->where('chat_messages.user_id', '!=', $userId)
+                ->where(function ($query) {
+                    $query->whereNull('cp.last_read_at')
+                        ->orWhereColumn('chat_messages.created_at', '>', 'cp.last_read_at');
+                })
+                ->groupBy('chats.order_id')
+                ->selectRaw('chats.order_id as order_id, COUNT(*) as unread_count')
+                ->pluck('unread_count', 'order_id');
+
+            $tradeUnreadTotal = (int) $tradeUnreadCounts->sum();
+        }
+
+        $tradeOrders->each(function ($order) use ($tradeUnreadCounts) {
+            $order->unread_count = (int) ($tradeUnreadCounts[$order->id] ?? 0);
+        });
+
+        $avgRating = Rating::where('ratee_id', $user->id)->avg('stars');
+        $hasAnyRating = $avgRating !== null;
+        $roundedAverageRating = $hasAnyRating ? (int) round($avgRating) : 0;
+
+        return view('mypage.mypage', compact('user', 'listedItems', 'purchasedItems', 'tradeOrders', 'tradeUnreadTotal', 'roundedAverageRating', 'hasAnyRating', 'page'));
     }
 
     public function showProfile()

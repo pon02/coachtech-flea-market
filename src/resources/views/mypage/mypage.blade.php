@@ -19,6 +19,13 @@
 
         <div class="profile-info__details">
             <h1 class="profile-info__name">{{ $user->name }}</h1>
+            @if(!empty($hasAnyRating))
+                <div class="profile-rating" aria-label="平均評価 {{ $roundedAverageRating }}">
+                    @for($i = 1; $i <= 5; $i++)
+                        <span class="profile-rating__star {{ $i <= $roundedAverageRating ? 'is-on' : '' }}">★</span>
+                    @endfor
+                </div>
+            @endif
         </div>
 
         <div class="profile-info__actions">
@@ -32,6 +39,12 @@
         <div class="tab-buttons">
             <button class="tab-button {{ $page === 'sell' ? 'active' : '' }}" data-tab="listed">出品した商品</button>
             <button class="tab-button {{ $page === 'buy' ? 'active' : '' }}" data-tab="purchased">購入した商品</button>
+                <button class="tab-button {{ $page === 'trade' ? 'active' : '' }}" data-tab="trading">
+                    取引中の商品
+                    @if(!empty($tradeUnreadTotal) && $tradeUnreadTotal > 0)
+                        <span class="tab-unread-badge">{{ $tradeUnreadTotal }}</span>
+                    @endif
+                </button>
         </div>
         <div class="tab-divider"></div>
     </div>
@@ -93,6 +106,35 @@
                 @else
                     <div class="empty-state">
                         <p>購入した商品がありません</p>
+                    </div>
+                @endif
+            </div>
+
+            <div id="trading" class="tab-panel {{ $page === 'trade' ? 'active' : '' }}">
+                @if(!empty($tradeOrders) && $tradeOrders->count() > 0)
+                    <div class="products-grid">
+                        @foreach($tradeOrders as $tradeOrder)
+                            <a href="{{ route('trade.chat.show', $tradeOrder->id) }}" class="product-card">
+                                <div class="product-image">
+                                    @if(!empty($tradeOrder->unread_count) && $tradeOrder->unread_count > 0)
+                                        <div class="product-unread-badge">{{ $tradeOrder->unread_count }}</div>
+                                    @endif
+
+                                    @if($tradeOrder->item && $tradeOrder->item->item_image)
+                                        <img src="{{ asset('storage/' . $tradeOrder->item->item_image) }}" alt="{{ $tradeOrder->item->name }}">
+                                    @else
+                                        <div class="product-no-image">画像なし</div>
+                                    @endif
+                                </div>
+                                <div class="product-info">
+                                    <h3 class="product-name">{{ $tradeOrder->item->name ?? '' }}</h3>
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="empty-state">
+                        <p>取引中の商品がありません</p>
                     </div>
                 @endif
             </div>

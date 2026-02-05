@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', function() {
             targetTab = 'listed';   // 出品した商品
         } else if (pageParam === 'buy') {
             targetTab = 'purchased'; // 購入した商品
+        } else if (pageParam === 'trade') {
+            targetTab = 'trading'; // 取引中の商品
         } else {
             targetTab = 'listed';   // デフォルト
         }
@@ -39,6 +41,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 pageParam = 'sell';  // 出品した商品
             } else if (targetTab === 'purchased') {
                 pageParam = 'buy';   // 購入した商品
+            } else if (targetTab === 'trading') {
+                pageParam = 'trade'; // 取引中の商品
             }
 
             // タブ切り替え
