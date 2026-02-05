@@ -75,6 +75,9 @@ php artisan migrate --seed
 php artisan storage:link
 ```
 
+※ Docker環境では、PHPコンテナ起動時に `storage` / `bootstrap/cache` の書き込み権限を自動調整し、必要なら `storage:link` も自動作成します。
+そのため通常この手順は不要ですが、すでに `public/storage` が存在する場合などはスキップされます。
+
 7. フロントエンドアセットをビルド
 
 （任意）フロントエンドの依存を入れる場合（ホスト側で `src/` に移動して実行）
@@ -141,6 +144,7 @@ npm run dev
 - **ログイン**: http://localhost/login
 - **商品出品**: http://localhost/sell
 - **マイページ**: http://localhost/mypage
+- **取引チャット**: http://localhost/trade
 
 ## 機能一覧
 
@@ -171,16 +175,17 @@ npm run dev
 - いいね機能
 - コメント機能
 - マイリスト
+- 取引チャット機能
 
 ## 動作確認用ユーザー
 
 アプリケーションの動作確認のため、Seeder で作成している以下のデモアカウントをご利用ください：
 
-| ユーザー名 | メールアドレス     | パスワード |
-| ---------- | ------------------ | ---------- |
-| tanaka     | tanaka@example.com | 12345678   |
-| yamada     | yamada@example.com | 12345678   |
-| suzuki     | suzuki@example.com | 12345678   |
+| ユーザー名 | メールアドレス     | パスワード | 出品商品 |
+| ---------- | ------------------ | ---------- | --------- |
+| tanaka     | tanaka@example.com | 12345678   | CO01〜05 |
+| yamada     | yamada@example.com | 12345678   | CO06〜10 |
+| suzuki     | suzuki@example.com | 12345678   | 出品なし |
 
 **※注意**: これらはデモ用アカウントです。本番環境では使用しないでください。
 
@@ -218,8 +223,10 @@ docker compose exec -T php php artisan migrate:fresh --seed --env=testing
 ※ もし `storage` / `bootstrap/cache` の権限エラーが出る場合のみ、以下を実行してください。
 
 ```bash
-docker compose exec -T php chmod -R 777 storage bootstrap/cache
+docker compose exec -T php sh -lc 'chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true; chmod -R ug+rwX storage bootstrap/cache'
 ```
+
+※上記の権限調整は「ローカル開発用」です。本番環境ではアプリの実行ユーザーを固定し、必要最小限の権限設定にしてください。
 
 ```bash
 # 全テスト実行
