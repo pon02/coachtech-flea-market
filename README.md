@@ -53,6 +53,7 @@ composer install
 ```bash
 cp .env.example .env
 ```
+**※重要**: `cp .env.example .env` 後、DB設定は必ず手入力してください（DockerのMySQL設定に合わせる）
 
 ※ MailHog（メール送信テスト）で「An email must have a "From" or a "Sender" header.」が出る場合は、送信元が未設定です。
 このリポジトリの `src/.env.example` では `MAIL_FROM_ADDRESS` を設定済みなので、上記コピー後に `src/.env` に `MAIL_FROM_ADDRESS` が入っていることを確認してください。
