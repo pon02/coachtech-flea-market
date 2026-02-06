@@ -45,7 +45,7 @@ class TradeChatService
      * @return array{
      *   chat: Chat,
      *   messages: \Illuminate\Support\Collection<int, ChatMessage>,
-     *   sidebarOrders: ?\Illuminate\Support\Collection<int, Order>,
+        *   sidebarOrders: \Illuminate\Support\Collection<int, Order>,
      *   latestMessageId: int|null,
      *   partnerUser: \App\Models\User,
      *   shouldShowRatingModal: bool,
@@ -93,24 +93,26 @@ class TradeChatService
             $shouldShowRatingModal = true;
         }
 
-        $sidebarOrders = null;
-        if ($viewerId === (int) $order->item->user_id) {
-            $sidebarOrders = Order::with(['item', 'chat'])
-                ->where('status', 'pending')
-                ->whereHas('item', function ($query) use ($viewerId) {
-                    $query->where('user_id', $viewerId);
-                })
-                ->whereHas('chat')
-                ->addSelect([
-                    'last_message_at' => ChatMessage::query()
-                        ->selectRaw('MAX(chat_messages.created_at)')
-                        ->join('chats', 'chats.id', '=', 'chat_messages.chat_id')
-                        ->whereColumn('chats.order_id', 'orders.id'),
-                ])
-                ->orderByDesc('last_message_at')
-                ->orderByDesc('created_at')
-                ->get();
-        }
+        // - 購入者: orders.user_id が自分
+        // - 出品者: orders.item.user_id が自分
+        $sidebarOrders = Order::with(['item', 'chat'])
+            ->where('status', 'pending')
+            ->whereHas('chat')
+            ->where(function ($query) use ($viewerId) {
+                $query->where('user_id', $viewerId)
+                    ->orWhereHas('item', function ($q) use ($viewerId) {
+                        $q->where('user_id', $viewerId);
+                    });
+            })
+            ->addSelect([
+                'last_message_at' => ChatMessage::query()
+                    ->selectRaw('MAX(chat_messages.created_at)')
+                    ->join('chats', 'chats.id', '=', 'chat_messages.chat_id')
+                    ->whereColumn('chats.order_id', 'orders.id'),
+            ])
+            ->orderByDesc('last_message_at')
+            ->orderByDesc('created_at')
+            ->get();
 
         return [
             'chat' => $chat,

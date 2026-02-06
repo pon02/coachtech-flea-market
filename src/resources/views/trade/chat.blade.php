@@ -13,7 +13,7 @@
 <div class="trade-chat" data-order-id="{{ $order->id }}" data-user-id="{{ auth()->id() }}">
     <aside class="trade-chat__sidebar" aria-label="取引サイドバー">
         <h2 class="trade-chat__sidebar-title">その他の取引</h2>
-        @if(!$isBuyer && !empty($sidebarOrders))
+        @if(!empty($sidebarOrders) && $sidebarOrders->isNotEmpty())
             <ul class="trade-chat__sidebar-list">
                 @foreach($sidebarOrders as $sideOrder)
                     <li class="trade-chat__sidebar-item">
@@ -175,7 +175,7 @@
 
                 <input class="trade-chat__input" type="text" name="message" placeholder="取引メッセージを記入してください" value="{{ old('message') }}">
 
-                <input id="tradeChatImage" class="trade-chat__file" type="file" name="image" accept="image/png,image/jpeg">
+                <input id="tradeChatImage" class="trade-chat__file" type="file" name="image">
                 <label for="tradeChatImage" class="trade-chat__file-button">画像を追加</label>
 
                 <div class="trade-chat__attachment" id="tradeChatAttachment" aria-live="polite">
