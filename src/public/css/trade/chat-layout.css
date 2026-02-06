@@ -71,6 +71,7 @@ body {
     flex-direction: column;
     padding: 24px 24px;
     box-sizing: border-box;
+    min-width: 0;
     min-height: 0;
 }
 
@@ -147,6 +148,7 @@ body {
     display: flex;
     align-items: center;
     gap: 40px;
+    min-width: 0;
 }
 
 .trade-chat__product-image {
@@ -160,16 +162,115 @@ body {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    min-width: 0;
 }
 
 .trade-chat__product-name {
     font-size: 48px;
     font-weight: bold;
     margin: 0;
+    overflow-wrap: anywhere;
 }
 
 .trade-chat__product-price {
     font-size: 36px;
     font-weight: 400;
     margin: 0;
+}
+
+/* ===== Responsive (Tablet) ===== */
+@media (max-width: 900px) {
+    .trade-chat__sidebar {
+        width: 210px;
+        flex: 0 1 210px;
+        min-width: 170px;
+        padding: 18px 12px;
+    }
+
+    .trade-chat__sidebar-list {
+        align-items: stretch;
+    }
+
+    .trade-chat__sidebar-item {
+        width: 100%;
+    }
+
+    .trade-chat__sidebar-title {
+        font-size: 22px;
+    }
+
+    .trade-chat__sidebar-item a {
+        width: 100%;
+        font-size: 18px;
+        height: auto;
+        padding: 10px 12px;
+    }
+
+    .trade-chat__main {
+        padding: 16px;
+    }
+
+    .trade-chat__divider {
+        margin: 12px -16px;
+    }
+
+    .trade-chat__title {
+        font-size: 26px;
+    }
+
+    .trade-chat__complete {
+        width: auto;
+        padding: 0 16px;
+        font-size: 16px;
+        height: 44px;
+    }
+
+    .trade-chat__product {
+        gap: 16px;
+    }
+
+    .trade-chat__product-image {
+        width: 140px;
+        height: 140px;
+        flex: 0 0 auto;
+    }
+
+    .trade-chat__product-name {
+        font-size: 32px;
+    }
+
+    .trade-chat__product-price {
+        font-size: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    .trade-chat__sidebar {
+        width: 190px;
+        flex-basis: 190px;
+        min-width: 150px;
+    }
+
+    .trade-chat__partner-avatar,
+    .trade-chat__partner-avatar-placeholder {
+        width: 64px;
+        height: 64px;
+    }
+
+    .trade-chat__title {
+        font-size: 22px;
+    }
+
+    .trade-chat__product-image {
+        width: 120px;
+        height: 120px;
+    }
+
+    .trade-chat__product-name {
+        font-size: 26px;
+    }
+
+    .trade-chat__product-price {
+        font-size: 20px;
+    }
 }
