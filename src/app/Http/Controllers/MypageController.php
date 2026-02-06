@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Item;
 use App\Models\Order;
 use App\Models\Chat;
+use App\Models\ChatMessage;
 use App\Models\Rating;
 use App\Http\Requests\ProfileRequest;
 
@@ -48,6 +49,13 @@ class MypageController extends Controller
                         $q->where('user_id', $user->id);
                     });
             })
+            ->addSelect([
+                'last_message_at' => ChatMessage::query()
+                    ->selectRaw('MAX(chat_messages.created_at)')
+                    ->join('chats', 'chats.id', '=', 'chat_messages.chat_id')
+                    ->whereColumn('chats.order_id', 'orders.id'),
+            ])
+            ->orderByDesc('last_message_at')
             ->orderByDesc('created_at')
             ->get();
 
