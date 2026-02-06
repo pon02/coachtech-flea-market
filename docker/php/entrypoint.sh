@@ -30,10 +30,10 @@ fix_perms storage
 fix_perms bootstrap/cache
 
 # Create storage symlink for public access (safe to rerun).
-if [ -f artisan ]; then
-  if [ ! -e public/storage ]; then
-    php artisan storage:link >/dev/null 2>&1 || true
-  fi
+# We intentionally do this without artisan so it works even before composer install.
+if [ ! -e public/storage ]; then
+  mkdir -p public storage/app/public
+  ln -sfn /var/www/storage/app/public /var/www/public/storage 2>/dev/null || true
 fi
 
 exec "$@"

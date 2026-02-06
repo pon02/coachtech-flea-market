@@ -5,9 +5,29 @@ namespace Database\Seeders;
 use App\Models\Item;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
 
 class ItemSeeder extends Seeder
 {
+    private function ensurePublicFileExists(string $destPath, string $sourcePath): void
+    {
+        $disk = Storage::disk('public');
+        if ($disk->exists($destPath)) {
+            return;
+        }
+
+        if (!is_file($sourcePath)) {
+            return;
+        }
+
+        $contents = file_get_contents($sourcePath);
+        if ($contents === false) {
+            return;
+        }
+
+        $disk->put($destPath, $contents);
+    }
+
     /**
      * Run the database seeds.
      *
@@ -15,6 +35,47 @@ class ItemSeeder extends Seeder
      */
     public function run()
     {
+        $this->ensurePublicFileExists(
+            'items/MensClock.jpg',
+            database_path('seeders/assets/items/MensClock.jpg')
+        );
+        $this->ensurePublicFileExists(
+            'items/HDDHardDisk.jpg',
+            database_path('seeders/assets/items/HDDHardDisk.jpg')
+        );
+        $this->ensurePublicFileExists(
+            'items/Tamanegi.jpg',
+            database_path('seeders/assets/items/Tamanegi.jpg')
+        );
+        $this->ensurePublicFileExists(
+            'items/LeatherShoes.jpg',
+            database_path('seeders/assets/items/LeatherShoes.jpg')
+        );
+        $this->ensurePublicFileExists(
+            'items/NotePC.jpg',
+            database_path('seeders/assets/items/NotePC.jpg')
+        );
+        $this->ensurePublicFileExists(
+            'items/Mic.jpg',
+            database_path('seeders/assets/items/Mic.jpg')
+        );
+        $this->ensurePublicFileExists(
+            'items/Bag.jpg',
+            database_path('seeders/assets/items/Bag.jpg')
+        );
+        $this->ensurePublicFileExists(
+            'items/Tumbler.jpg',
+            database_path('seeders/assets/items/Tumbler.jpg')
+        );
+        $this->ensurePublicFileExists(
+            'items/CoffeeMill.jpg',
+            database_path('seeders/assets/items/CoffeeMill.jpg')
+        );
+        $this->ensurePublicFileExists(
+            'items/MakeUpSet.jpg',
+            database_path('seeders/assets/items/MakeUpSet.jpg')
+        );
+
         $watch = Item::create([
             'user_id' => 1,
             'name' => '腕時計',
