@@ -161,3 +161,67 @@
     background: #fff;
     cursor: pointer;
 }
+
+/* ===== Responsive (Tablet) ===== */
+@media (max-width: 900px) {
+    .trade-chat__img-modal-card {
+        width: min(760px, 92vw);
+        padding: 10px;
+        gap: 8px;
+    }
+
+    .trade-chat__img-modal-close {
+        width: 32px;
+        height: 32px;
+        font-size: 18px;
+        line-height: 32px;
+    }
+
+    .trade-chat__img-modal-image {
+        max-height: 72vh;
+    }
+
+    .trade-chat__img-modal-open {
+        font-size: 13px;
+    }
+
+    .trade-chat__modal-card {
+        width: min(520px, 92vw);
+        height: 340px;
+        padding: 20px;
+    }
+
+    .trade-chat__modal-title {
+        font-size: 28px;
+    }
+
+    .trade-chat__modal-divider {
+        margin: 12px -20px;
+    }
+
+    .trade-chat__modal-text {
+        font-size: 18px;
+    }
+
+    .trade-chat__stars {
+        gap: 10px;
+        margin: 14px 0;
+    }
+
+    .trade-chat__star {
+        width: 84px;
+        height: 84px;
+        font-size: 60px;
+        line-height: 84px;
+    }
+
+    .trade-chat__modal-submit {
+        width: 112px;
+        height: 44px;
+        font-size: 20px;
+    }
+
+    .trade-chat__modal-close {
+        padding: 8px 12px;
+    }
+}
