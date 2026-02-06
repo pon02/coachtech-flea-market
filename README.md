@@ -193,7 +193,7 @@ npm run dev
 
 ### テスト実行前の準備（初回のみ）
 
-このリポジトリは MySQL を使用します。テストは `laravel_test` データベースを使うため、初回は DB を作成し、`.env.testing` を準備してください。
+このリポジトリは MySQL を使用します。テストは `laravel_test_db` データベースを使うため、初回は DB を作成し、`.env.testing` を準備してください。
 
 1) `.env.testing` を作成
 
@@ -208,10 +208,10 @@ docker compose exec -T php cp .env.example .env.testing
 docker compose exec -T php php artisan key:generate --env=testing
 ```
 
-3) テスト用DBを作成（`laravel_test`）
+3) テスト用DBを作成（`laravel_test_db`）
 
 ```bash
-docker compose exec -T mysql mysql -uroot -pdev_root_pass -e "CREATE DATABASE IF NOT EXISTS laravel_test; GRANT ALL PRIVILEGES ON laravel_test.* TO 'laravel_user'@'%'; FLUSH PRIVILEGES;"
+docker compose exec -T mysql mysql -uroot -pdev_root_pass -e "CREATE DATABASE IF NOT EXISTS laravel_test_db; GRANT ALL PRIVILEGES ON laravel_test_db.* TO 'laravel_user'@'%'; FLUSH PRIVILEGES;"
 ```
 
 4) 接続確認（任意）
