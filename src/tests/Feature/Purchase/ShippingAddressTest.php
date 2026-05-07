@@ -98,18 +98,20 @@ class ShippingAddressTest extends TestCase
           ->assertSessionHas('success', '配送先住所を変更しました。');
 
         $convenienceStorePayment = Payment::where('name', 'コンビニ払い')->first();
-        $this->post("/purchase/{$item->id}", [
+        $purchaseResponse = $this->post("/purchase/{$item->id}", [
             'payment_id' => $convenienceStorePayment->id,
             'postal_code' => self::NEW_POSTAL_CODE,
             'address' => self::NEW_ADDRESS,
-        ])->assertRedirect('/');
+        ]);
+
+        $purchaseResponse->assertRedirect('/');
 
         $this->assertDatabaseHas('orders', [
             'user_id' => $buyer->id,
             'item_id' => $item->id,
             'payment_id' => $convenienceStorePayment->id,
             'price' => $item->price,
-            'status' => 'completed',
+            'status' => 'pending',
             'shipping_postal_code' => self::NEW_POSTAL_CODE,
         ]);
 

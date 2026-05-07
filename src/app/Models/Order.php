@@ -15,8 +15,15 @@ class Order extends Model
         'payment_id',
         'price',
         'status',
+        'completed_requested_at',
+        'completed_at',
         'shipping_postal_code',
         'shipping_address',
+    ];
+
+    protected $casts = [
+        'completed_requested_at' => 'datetime',
+        'completed_at' => 'datetime',
     ];
 
     /**
@@ -41,5 +48,21 @@ class Order extends Model
     public function payment()
     {
         return $this->belongsTo(Payment::class);
+    }
+
+    /**
+     * 注文とチャットの1対1リレーション
+     */
+    public function chat()
+    {
+        return $this->hasOne(Chat::class);
+    }
+
+    /**
+     * 注文と評価の1対多リレーション
+     */
+    public function ratings()
+    {
+        return $this->hasMany(Rating::class);
     }
 }

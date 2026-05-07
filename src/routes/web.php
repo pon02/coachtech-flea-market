@@ -8,6 +8,8 @@ use App\Http\Controllers\ShippingAddressController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ChatController;
+use App\Http\Controllers\RatingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -75,6 +77,16 @@ Route::middleware(['auth'])->group(function () {
     // コメント機能（authミドルウェアで保護）
     // ========================================
     Route::post('/item/{id}/comment', [CommentController::class, 'store'])->name('comments.store');
+
+    // ========================================
+    // 取引チャット・評価（authミドルウェアで保護）
+    // ========================================
+    Route::get('/trade/{order}/chat', [ChatController::class, 'show'])->name('trade.chat.show');
+    Route::post('/trade/{order}/messages', [ChatController::class, 'storeMessage'])->name('trade.messages.store');
+    Route::patch('/trade/{order}/messages/{message}', [ChatController::class, 'updateMessage'])->name('trade.messages.update');
+    Route::delete('/trade/{order}/messages/{message}', [ChatController::class, 'destroyMessage'])->name('trade.messages.destroy');
+    Route::post('/trade/{order}/complete-request', [ChatController::class, 'requestComplete'])->name('trade.complete.request');
+    Route::post('/trade/{order}/ratings', [RatingController::class, 'store'])->name('trade.ratings.store');
 });
 
 

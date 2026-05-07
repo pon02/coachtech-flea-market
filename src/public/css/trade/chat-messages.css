@@ -1,0 +1,341 @@
+/* ===== Messages ===== */
+.trade-chat__messages {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.trade-chat__message {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.trade-chat__message--me {
+    justify-content: flex-end;
+}
+
+.trade-chat__message-body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.trade-chat__message--me .trade-chat__message-body {
+    align-items: flex-end;
+}
+
+.trade-chat__message-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    width: 100%;
+}
+
+.trade-chat__message--me .trade-chat__message-meta {
+    justify-content: flex-end;
+}
+
+.trade-chat__message-name {
+    font-size: 20px;
+    font-weight: bold;
+    color: #000;
+}
+
+.trade-chat__message-avatar,
+.trade-chat__message-avatar-placeholder {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    flex: 0 0 auto;
+}
+
+.trade-chat__message-avatar {
+    object-fit: cover;
+}
+
+.trade-chat__message-avatar-placeholder {
+    background: #d9d9d9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    color: #555;
+}
+
+.trade-chat__bubble {
+    background: #d9d9d9;
+    border-radius: 4px;
+    padding: 10px 12px;
+    max-width: 560px;
+    min-width: 300px;
+    word-break: break-word;
+}
+
+.trade-chat__bubble-image {
+    margin-top: 8px;
+}
+
+.trade-chat__thumb-button {
+    border: none;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.trade-chat__thumb {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    display: block;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+.trade-chat__thumb-button:hover .trade-chat__thumb {
+    filter: brightness(0.95);
+}
+
+/* ===== Inline Edit ===== */
+.trade-chat__bubble-view {
+    display: block;
+}
+
+.trade-chat__bubble-edit {
+    display: none;
+}
+
+.trade-chat__message.is-editing .trade-chat__bubble-view {
+    display: none;
+}
+
+.trade-chat__message.is-editing .trade-chat__bubble-edit {
+    display: block;
+}
+
+.trade-chat__inline-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.trade-chat__inline-textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 2px solid #5f5f5f;
+    border-radius: 4px;
+    padding: 8px 10px;
+    font-size: 14px;
+    resize: vertical;
+    background: #fff;
+}
+
+.trade-chat__inline-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.trade-chat__inline-save {
+    border: none;
+    background: #000;
+    color: #fff;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.trade-chat__inline-cancel {
+    border: 1px solid #999;
+    background: #fff;
+    color: #000;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.trade-chat__message-actions {
+    margin: 6px 20px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 15px;
+}
+
+.trade-chat__link-button {
+    border: none;
+    background: transparent;
+    color: #000;
+    cursor: pointer;
+    padding: 0;
+}
+
+.trade-chat__edit-form {
+    margin-top: 8px;
+}
+
+/* ===== Composer (Send) ===== */
+.trade-chat__send {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.trade-chat__send-disabled {
+    margin-top: 16px;
+    padding: 12px 14px;
+    border: 1px solid #bdbdbd;
+    border-radius: 6px;
+    background: #f6f6f6;
+    color: #555;
+    font-size: 14px;
+}
+
+.trade-chat__input {
+    flex: 1;
+    border-radius: 4px;
+    border: 1px solid #5f5f5f;
+    padding: 10px 12px;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.trade-chat__file {
+    display: none;
+}
+
+.trade-chat__file-button {
+    border-radius: 10px;
+    border: 2px solid #ff5555;
+    color: #ff5555;
+    padding: 8px 12px;
+    font-size: 20px;
+    background: transparent;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.trade-chat__send-button {
+    width: 48px;
+    height: 48px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+}
+
+.trade-chat__attachment {
+    display: none;
+    width: 15%;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border: 1px solid #d0d0d0;
+    border-radius: 6px;
+    background: #fafafa;
+}
+
+.trade-chat__attachment.is-visible {
+    display: flex;
+}
+
+.trade-chat__attachment-thumb {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 6px;
+    background: #e9e9e9;
+    flex: 0 0 auto;
+}
+
+.trade-chat__attachment-name {
+    flex: 1;
+    font-size: 14px;
+    color: #333;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.trade-chat__attachment-remove {
+    border: none;
+    background: transparent;
+    color: #ff5555;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 4px 6px;
+    white-space: nowrap;
+}
+
+.trade-chat__send-button img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+}
+
+.trade-chat__error {
+    color: #c00;
+    margin-top: 6px;
+    font-size: 14px;
+}
+
+@media (max-width: 900px) {
+    .trade-chat__bubble {
+        max-width: 100%;
+        min-width: 0;
+        font-size: 14px;
+        padding: 8px 10px;
+    }
+
+    .trade-chat__send {
+        gap: 5px;
+        flex-wrap: nowrap;
+    }
+
+    .trade-chat__input {
+        min-width: 0;
+        font-size: 16px;
+        padding: 8px 10px;
+        flex: 1 1 0;
+    }
+
+    .trade-chat__attachment {
+        width: auto;
+        flex: 0 0 auto;
+        max-width: none;
+        box-sizing: border-box;
+        gap: 6px;
+        padding: 4px 6px;
+    }
+
+    .trade-chat__attachment-thumb {
+        width: 40px;
+        height: 40px;
+    }
+
+    .trade-chat__attachment-name {
+        display: none;
+    }
+
+    .trade-chat__attachment-remove {
+        font-size: 11px;
+        padding: 2px 4px;
+    }
+
+    .trade-chat__file-button {
+        font-size: 15px;
+        padding: 4px 5px;
+    }
+
+    .trade-chat__send-button,
+    .trade-chat__send-button img {
+        width: 36px;
+        height: 36px;
+    }
+}

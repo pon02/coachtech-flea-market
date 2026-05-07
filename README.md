@@ -53,6 +53,7 @@ composer install
 ```bash
 cp .env.example .env
 ```
+**※重要**: `cp .env.example .env` 後、DB設定は必ず手入力してください（DockerのMySQL設定に合わせる）
 
 ※ MailHog（メール送信テスト）で「An email must have a "From" or a "Sender" header.」が出る場合は、送信元が未設定です。
 このリポジトリの `src/.env.example` では `MAIL_FROM_ADDRESS` を設定済みなので、上記コピー後に `src/.env` に `MAIL_FROM_ADDRESS` が入っていることを確認してください。
@@ -74,6 +75,9 @@ php artisan migrate --seed
 ```bash
 php artisan storage:link
 ```
+
+※ Docker環境では、PHPコンテナ起動時に `storage` / `bootstrap/cache` の書き込み権限を自動調整し、必要なら `storage:link` も自動作成します。
+そのため通常この手順は不要ですが、すでに `public/storage` が存在する場合などはスキップされます。
 
 7. フロントエンドアセットをビルド
 
@@ -141,6 +145,7 @@ npm run dev
 - **ログイン**: http://localhost/login
 - **商品出品**: http://localhost/sell
 - **マイページ**: http://localhost/mypage
+- **取引チャット**: http://localhost/trade
 
 ## 機能一覧
 
@@ -171,16 +176,17 @@ npm run dev
 - いいね機能
 - コメント機能
 - マイリスト
+- 取引チャット機能
 
 ## 動作確認用ユーザー
 
 アプリケーションの動作確認のため、Seeder で作成している以下のデモアカウントをご利用ください：
 
-| ユーザー名 | メールアドレス     | パスワード |
-| ---------- | ------------------ | ---------- |
-| tanaka     | tanaka@example.com | 12345678   |
-| yamada     | yamada@example.com | 12345678   |
-| suzuki     | suzuki@example.com | 12345678   |
+| ユーザー名 | メールアドレス     | パスワード | 出品商品 |
+| ---------- | ------------------ | ---------- | --------- |
+| tanaka     | tanaka@example.com | 12345678   | CO01〜05 |
+| yamada     | yamada@example.com | 12345678   | CO06〜10 |
+| suzuki     | suzuki@example.com | 12345678   | 出品なし |
 
 **※注意**: これらはデモ用アカウントです。本番環境では使用しないでください。
 
@@ -188,7 +194,7 @@ npm run dev
 
 ### テスト実行前の準備（初回のみ）
 
-このリポジトリは MySQL を使用します。テストは `laravel_test` データベースを使うため、初回は DB を作成し、`.env.testing` を準備してください。
+このリポジトリは MySQL を使用します。テストは `laravel_test_db` データベースを使うため、初回は DB を作成し、`.env.testing` を準備してください。
 
 1) `.env.testing` を作成
 
@@ -203,10 +209,10 @@ docker compose exec -T php cp .env.example .env.testing
 docker compose exec -T php php artisan key:generate --env=testing
 ```
 
-3) テスト用DBを作成（`laravel_test`）
+3) テスト用DBを作成（`laravel_test_db`）
 
 ```bash
-docker compose exec -T mysql mysql -uroot -pdev_root_pass -e "CREATE DATABASE IF NOT EXISTS laravel_test; GRANT ALL PRIVILEGES ON laravel_test.* TO 'laravel_user'@'%'; FLUSH PRIVILEGES;"
+docker compose exec -T mysql mysql -uroot -pdev_root_pass -e "CREATE DATABASE IF NOT EXISTS laravel_test_db; GRANT ALL PRIVILEGES ON laravel_test_db.* TO 'laravel_user'@'%'; FLUSH PRIVILEGES;"
 ```
 
 4) 接続確認（任意）
@@ -218,8 +224,10 @@ docker compose exec -T php php artisan migrate:fresh --seed --env=testing
 ※ もし `storage` / `bootstrap/cache` の権限エラーが出る場合のみ、以下を実行してください。
 
 ```bash
-docker compose exec -T php chmod -R 777 storage bootstrap/cache
+docker compose exec -T php sh -lc 'chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true; chmod -R ug+rwX storage bootstrap/cache'
 ```
+
+※上記の権限調整は「ローカル開発用」です。本番環境ではアプリの実行ユーザーを固定し、必要最小限の権限設定にしてください。
 
 ```bash
 # 全テスト実行

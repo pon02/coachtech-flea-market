@@ -20,6 +20,8 @@ return new class extends Migration
             $table->foreignId('payment_id')->constrained()->onDelete('cascade');
             $table->decimal('price', 10, 2);
             $table->enum('status', ['pending', 'completed', 'cancelled'])->default('pending');
+            $table->timestamp('completed_requested_at')->nullable();
+            $table->timestamp('completed_at')->nullable();
             $table->string('shipping_postal_code');
             $table->string('shipping_address');
             $table->timestamps();

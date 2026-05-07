@@ -21,7 +21,7 @@ class PaymentSeeder extends Seeder
         ];
 
         foreach ($payments as $payment) {
-            Payment::create([
+            Payment::firstOrCreate([
                 'name' => $payment,
             ]);
         }

@@ -6,9 +6,29 @@ use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class UserSeeder extends Seeder
 {
+    private function ensurePublicFileExists(string $destPath, string $sourcePath): void
+    {
+        $disk = Storage::disk('public');
+        if ($disk->exists($destPath)) {
+            return;
+        }
+
+        if (!is_file($sourcePath)) {
+            return;
+        }
+
+        $contents = file_get_contents($sourcePath);
+        if ($contents === false) {
+            return;
+        }
+
+        $disk->put($destPath, $contents);
+    }
+
     /**
      * Run the database seeds.
      *
@@ -16,6 +36,19 @@ class UserSeeder extends Seeder
      */
     public function run()
     {
+        $this->ensurePublicFileExists(
+            'profile_images/tanaka.jpeg',
+            database_path('seeders/assets/profile_images/tanaka.jpeg')
+        );
+        $this->ensurePublicFileExists(
+            'profile_images/yamada.jpeg',
+            database_path('seeders/assets/profile_images/yamada.jpeg')
+        );
+        $this->ensurePublicFileExists(
+            'profile_images/suzuki.jpeg',
+            database_path('seeders/assets/profile_images/suzuki.jpeg')
+        );
+
         $users = [
             [
                 'name' => 'tanaka',
@@ -34,18 +67,6 @@ class UserSeeder extends Seeder
                 'email' => 'suzuki@example.com',
                 'password' => Hash::make('12345678'),
                 'profile_image' => 'profile_images/suzuki.jpeg',
-            ],
-            [
-                'name' => 'sato',
-                'email' => 'sato@example.com',
-                'password' => Hash::make('12345678'),
-                'profile_image' => 'profile_images/sato.jpeg',
-            ],
-            [
-                'name' => 'takeda',
-                'email' => 'takeda@example.com',
-                'password' => Hash::make('12345678'),
-                'profile_image' => 'profile_images/takeda.jpeg',
             ],
         ];
 

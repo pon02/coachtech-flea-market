@@ -1,0 +1,149 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build and start containers
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d --build php mysql
+
+      - name: Install PHP dependencies (composer install)
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T php composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Wait for MySQL
+        run: |
+          set -e
+          for i in {1..30}; do
+            if docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T mysql mysql -uroot -pdev_root_pass -e "SELECT 1" >/dev/null 2>&1; then
+              echo "MySQL is ready"
+              exit 0
+            fi
+            echo "Waiting for MySQL... ($i/30)"
+            sleep 2
+          done
+          echo "MySQL did not become ready in time" >&2
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml logs mysql || true
+          exit 1
+
+      - name: Prepare .env.testing
+        run: |
+          cp src/.env.example src/.env.testing
+          sed -i 's/^APP_ENV=.*/APP_ENV=testing/' src/.env.testing
+          sed -i 's/^APP_DEBUG=.*/APP_DEBUG=false/' src/.env.testing
+          sed -i 's/^DB_HOST=.*/DB_HOST=mysql/' src/.env.testing
+          sed -i 's/^DB_DATABASE=.*/DB_DATABASE=laravel_test_db/' src/.env.testing
+          sed -i 's/^DB_USERNAME=.*/DB_USERNAME=laravel_user/' src/.env.testing
+          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=dev_laravel_pass/' src/.env.testing
+
+      - name: Create test database
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T mysql mysql -uroot -pdev_root_pass -e "CREATE DATABASE IF NOT EXISTS laravel_test_db; GRANT ALL PRIVILEGES ON laravel_test_db.* TO 'laravel_user'@'%'; FLUSH PRIVILEGES;"
+
+      - name: Generate APP_KEY (testing)
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T php php artisan key:generate --env=testing
+
+      - name: Run tests (generate JUnit report)
+        id: run_tests
+        continue-on-error: true
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T php sh -lc 'mkdir -p storage/test-results'
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T php php artisan test --env=testing --log-junit storage/test-results/junit.xml
+
+      - name: Upload test report (artifact)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-test-report
+          path: src/storage/test-results/
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Upload Laravel logs (artifact)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: laravel-logs
+          path: src/storage/logs/
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Summarize JUnit report
+        if: always()
+        run: |
+          if [ ! -f src/storage/test-results/junit.xml ]; then
+            echo "JUnit report not found: src/storage/test-results/junit.xml"
+            exit 0
+          fi
+
+          python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          p = Path('src/storage/test-results/junit.xml')
+          tree = ET.parse(p)
+          root = tree.getroot()
+
+          def get_int(attr):
+              v = root.attrib.get(attr)
+              return int(v) if v and v.isdigit() else 0
+
+          tests = get_int('tests')
+          failures = get_int('failures')
+          errors = get_int('errors')
+          skipped = get_int('skipped')
+          time = root.attrib.get('time', '?')
+
+          print(f"JUnit summary: tests={tests} failures={failures} errors={errors} skipped={skipped} time={time}")
+
+          if failures == 0 and errors == 0:
+              print('No failures in JUnit report')
+              raise SystemExit(0)
+
+          failed = []
+          for tc in root.iter('testcase'):
+              fname = tc.attrib.get('name', '')
+              cls = tc.attrib.get('classname', '')
+              failure = tc.find('failure')
+              error = tc.find('error')
+              node = failure if failure is not None else error
+              if node is None:
+                  continue
+              msg = (node.attrib.get('message') or '').strip()
+              text = (node.text or '').strip()
+              failed.append((cls, fname, msg, text))
+
+          print('First failed tests:')
+          for i, (cls, fname, msg, text) in enumerate(failed[:20], start=1):
+              print(f"{i}. {cls}::{fname}")
+              if msg:
+                  print(f"   message: {msg}")
+              if text:
+                  print(f"   details: {text.splitlines()[0][:200]}")
+          PY
+
+      - name: Dump logs on failure
+        if: steps.run_tests.outcome == 'failure'
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml ps
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml logs --no-color | tail -n 400
+
+      - name: Fail job if tests failed
+        if: steps.run_tests.outcome == 'failure'
+        run: exit 1
+
+      - name: Tear down
+        if: always()
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml down -v

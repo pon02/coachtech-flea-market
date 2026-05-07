@@ -5,9 +5,29 @@ namespace Database\Seeders;
 use App\Models\Item;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
 
 class ItemSeeder extends Seeder
 {
+    private function ensurePublicFileExists(string $destPath, string $sourcePath): void
+    {
+        $disk = Storage::disk('public');
+        if ($disk->exists($destPath)) {
+            return;
+        }
+
+        if (!is_file($sourcePath)) {
+            return;
+        }
+
+        $contents = file_get_contents($sourcePath);
+        if ($contents === false) {
+            return;
+        }
+
+        $disk->put($destPath, $contents);
+    }
+
     /**
      * Run the database seeds.
      *
@@ -15,6 +35,47 @@ class ItemSeeder extends Seeder
      */
     public function run()
     {
+        $this->ensurePublicFileExists(
+            'items/MensClock.jpg',
+            database_path('seeders/assets/items/MensClock.jpg')
+        );
+        $this->ensurePublicFileExists(
+            'items/HDDHardDisk.jpg',
+            database_path('seeders/assets/items/HDDHardDisk.jpg')
+        );
+        $this->ensurePublicFileExists(
+            'items/Tamanegi.jpg',
+            database_path('seeders/assets/items/Tamanegi.jpg')
+        );
+        $this->ensurePublicFileExists(
+            'items/LeatherShoes.jpg',
+            database_path('seeders/assets/items/LeatherShoes.jpg')
+        );
+        $this->ensurePublicFileExists(
+            'items/NotePC.jpg',
+            database_path('seeders/assets/items/NotePC.jpg')
+        );
+        $this->ensurePublicFileExists(
+            'items/Mic.jpg',
+            database_path('seeders/assets/items/Mic.jpg')
+        );
+        $this->ensurePublicFileExists(
+            'items/Bag.jpg',
+            database_path('seeders/assets/items/Bag.jpg')
+        );
+        $this->ensurePublicFileExists(
+            'items/Tumbler.jpg',
+            database_path('seeders/assets/items/Tumbler.jpg')
+        );
+        $this->ensurePublicFileExists(
+            'items/CoffeeMill.jpg',
+            database_path('seeders/assets/items/CoffeeMill.jpg')
+        );
+        $this->ensurePublicFileExists(
+            'items/MakeUpSet.jpg',
+            database_path('seeders/assets/items/MakeUpSet.jpg')
+        );
+
         $watch = Item::create([
             'user_id' => 1,
             'name' => '腕時計',
@@ -38,7 +99,7 @@ class ItemSeeder extends Seeder
         $hdd->categories()->attach([2]);
 
         $onion = Item::create([
-            'user_id' => 2,
+            'user_id' => 1,
             'name' => '玉ねぎ3束',
             'brand_name' => 'なし',
             'condition_id' => 3,
@@ -49,7 +110,7 @@ class ItemSeeder extends Seeder
         $onion->categories()->attach([10, 11]);
 
         $shoes = Item::create([
-            'user_id' => 2,
+            'user_id' => 1,
             'name' => '革靴',
             'brand_name' => '',
             'condition_id' => 4,
@@ -60,7 +121,7 @@ class ItemSeeder extends Seeder
         $shoes->categories()->attach([1, 5]);
 
         $laptop = Item::create([
-            'user_id' => 3,
+            'user_id' => 1,
             'name' => 'ノートPC',
             'brand_name' => '',
             'condition_id' => 1,
@@ -71,7 +132,7 @@ class ItemSeeder extends Seeder
         $laptop->categories()->attach([2]);
 
         $mic = Item::create([
-            'user_id' => 3,
+            'user_id' => 2,
             'name' => 'マイク',
             'brand_name' => 'なし',
             'condition_id' => 2,
@@ -82,7 +143,7 @@ class ItemSeeder extends Seeder
         $mic->categories()->attach([2]);
 
         $bag = Item::create([
-            'user_id' => 4,
+            'user_id' => 2,
             'name' => 'ショルダーバッグ',
             'brand_name' => '',
             'condition_id' => 3,
@@ -93,7 +154,7 @@ class ItemSeeder extends Seeder
         $bag->categories()->attach([1, 4]);
 
         $tumbler = Item::create([
-            'user_id' => 4,
+            'user_id' => 2,
             'name' => 'タンブラー',
             'brand_name' => 'なし',
             'condition_id' => 4,
@@ -104,7 +165,7 @@ class ItemSeeder extends Seeder
         $tumbler->categories()->attach([10]);
 
         $grinder = Item::create([
-            'user_id' => 5,
+            'user_id' => 2,
             'name' => 'コーヒーミル',
             'brand_name' => 'Starbacks',
             'condition_id' => 1,
@@ -115,7 +176,7 @@ class ItemSeeder extends Seeder
         $grinder->categories()->attach([10]);
 
         $makeup = Item::create([
-            'user_id' => 5,
+            'user_id' => 2,
             'name' => 'メイクセット',
             'brand_name' => '',
             'condition_id' => 2,
