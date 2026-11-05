@@ -1,4 +1,4 @@
-FROM php:8.1-fpm
+FROM php:8.4-fpm
 
 COPY php.ini /usr/local/etc/php/
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
